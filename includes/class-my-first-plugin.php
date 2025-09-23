@@ -105,9 +105,15 @@ class My_First_Plugin
 	public function add_footer_text()
 	{
 		$footer_text = get_option('my_first_plugin_footer_text', 'Сайт работает на моём первом плагине!');
+		$style_type = get_option('my_first_plugin_style_type', 'default');
 
-		// Добавляем CSS-класс для стилизации
-		echo '<p class="mfp-footer-text">' . esc_html($footer_text) . '</p>';
+		// Формируем CSS-классы в зависимости от настроек
+		$css_classes = 'mfp-footer-text';
+		if ($style_type === 'highlight') {
+			$css_classes .= ' highlight';
+		}
+
+		echo '<p class="' . esc_attr($css_classes) . '">' . esc_html($footer_text) . '</p>';
 	}
 
 
@@ -117,6 +123,9 @@ class My_First_Plugin
 	public function register_settings()
 	{
 		register_setting('general', 'my_first_plugin_footer_text');
+
+		// Добавляем новую настройку для стиля
+		register_setting('general', 'my_first_plugin_style_type');
 
 		add_settings_section(
 			'my_first_plugin_section',
@@ -132,6 +141,16 @@ class My_First_Plugin
 			'general',
 			'my_first_plugin_section'
 		);
+
+		// Добавляем новое поле для выбора стиля
+		add_settings_field(
+			'my_first_plugin_style_field',
+			'Стиль текста',
+			array($this, 'render_style_field'),
+			'general',
+			'my_first_plugin_section'
+		);
+
 	}
 
 	/**
@@ -150,6 +169,22 @@ class My_First_Plugin
 		$value = get_option('my_first_plugin_footer_text', 'Сайт работает на моём первом плагине!');
 		echo '<input type="text" name="my_first_plugin_footer_text" value="' . esc_attr($value) . '" class="regular-text">';
 	}
+
+	/**
+	 * Выводит поле выбора стиля текста
+	 */
+	public function render_style_field()
+	{
+		$current_style = get_option('my_first_plugin_style_type', 'default');
+		?>
+		<select name="my_first_plugin_style_type">
+			<option value="default" <?php selected($current_style, 'default'); ?>>Обычный</option>
+			<option value="highlight" <?php selected($current_style, 'highlight'); ?>>Выделенный</option>
+		</select>
+		<p class="description">Выберите внешний вид текста в подвале сайта</p>
+		<?php
+	}
+
 }
 
 ?>
